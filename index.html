@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#120726"><title>Vidya Quest</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{--g:#ffd24a;--g2:#b8860b;--bg:#120726;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:system-ui,sans-serif;background:radial-gradient(circle at 50% 0,#4b1d9a,#120726 65%) fixed;color:#fff;padding:env(safe-area-inset-top) 0 calc(150px + env(safe-area-inset-bottom));min-height:100vh}
+h2{margin:6px 0;color:var(--g);text-shadow:0 0 10px #ffd24a88}
+main{max-width:520px;margin:auto;padding:10px}
+.card{background:linear-gradient(160deg,#3a1480cc,#1c0a40cc);border:2px solid var(--g);border-radius:16px;padding:12px;margin:10px 0;box-shadow:0 0 14px #ffd24a44,inset 0 0 18px #7c3aed55}
+.hero{display:flex;gap:12px;align-items:center}
+.av{font-size:44px;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(#7c3aed,#2a0f5c);border:3px solid var(--g);box-shadow:0 0 18px var(--g);animation:glow 2s infinite alternate}
+@keyframes glow{to{box-shadow:0 0 30px #fff}}
+.bar{position:relative;height:22px;border-radius:12px;background:#0008;border:2px solid var(--g2);overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#ffd24a,#fff3b0);transition:width .8s;box-shadow:0 0 10px var(--g)}
+.bar span{position:absolute;inset:0;text-align:center;font-size:12px;line-height:18px;font-weight:700;text-shadow:0 1px 2px #000}
+.stats{display:flex;flex-wrap:wrap;gap:6px}.stats b{background:#0006;border:1px solid var(--g2);border-radius:20px;padding:4px 10px;font-size:14px}
+button,select,input,textarea{font:inherit}
+.btn{background:linear-gradient(#ffd24a,#d99a00);color:#2a0f5c;border:0;border-bottom:4px solid #8a5a00;border-radius:12px;padding:10px 14px;font-weight:800;margin:4px 2px;cursor:pointer}
+.btn:active{transform:translateY(3px);border-bottom-width:1px}
+.btn.p{background:linear-gradient(#a855f7,#6d28d9);color:#fff;border-bottom-color:#3b0f8a}
+.btn.r{background:linear-gradient(#f87171,#b91c1c);color:#fff;border-bottom-color:#7f1d1d}
+input,select,textarea{width:100%;padding:10px;margin:4px 0;border-radius:10px;border:2px solid #7c3aed;background:#1c0a40;color:#fff}
+input[type=checkbox]{width:auto}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+.q{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #fff2}
+.ach{display:inline-block;width:48%;text-align:center;padding:8px;margin:1%;border-radius:12px;border:2px solid #555;filter:grayscale(1);opacity:.55;vertical-align:top;font-size:12px}
+.ach.on{filter:none;opacity:1;border-color:var(--g);box-shadow:0 0 14px var(--g);background:#4b1d9a88}
+.ach big{font-size:30px;display:block}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#120726f2;border-top:2px solid var(--g);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;background:none;border:0;color:#fff;padding:8px 0;font-size:11px}nav button b{display:block;font-size:22px}nav .on{color:var(--g);background:#7c3aed55}
+.fab{position:fixed;right:14px;bottom:calc(80px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;font-size:28px;border:3px solid var(--g);background:radial-gradient(#a855f7,#4b1d9a);z-index:6;box-shadow:0 0 18px #a855f7;animation:glow 1.5s infinite alternate}
+#md{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:20;padding:16px}
+#md>div{max-width:440px;width:100%;max-height:90vh;overflow:auto;text-align:center;animation:pop .4s}
+@keyframes pop{from{transform:scale(.5);opacity:0}}
+#toast{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--g);color:#2a0f5c;font-weight:800;padding:10px 16px;border-radius:20px;z-index:30;display:none;box-shadow:0 0 20px var(--g)}
+#fl{position:fixed;left:50%;top:40%;font-size:34px;font-weight:900;color:var(--g);text-shadow:0 0 12px #000;z-index:25;pointer-events:none;transform:translateX(-50%);animation:fl 1.4s forwards}
+@keyframes fl{to{top:15%;opacity:0}}
+video,canvas{width:100%;border-radius:12px;background:#000}
+#cvh canvas{aspect-ratio:9/16;max-height:70vh;width:auto;max-width:100%;display:block;margin:auto}
+.big{font-size:64px;animation:glow 1s infinite alternate}
+small{opacity:.8}a{color:var(--g)}
+</style></head><body>
+<main id="app"></main>
+<button class="fab" onclick="voice()" aria-label="Voice">🎤</button>
+<nav id="nav"></nav><div id="md"></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const ACT={
+shloka:{l:'Shlokas memorized',x:20,u:'shlokas'},mcq:{l:'MCQs solved',x:3,u:'MCQs'},study:{l:'Study hours',x:100,u:'hours',s:1},
+chapter:{l:'Chapters completed',x:80,u:'chapters',s:1},revision:{l:'Revision sessions',x:100,u:'sessions',s:1},
+gym:{l:'Gym workout',x:150,u:'sessions',f:1},run:{l:'Running',x:40,u:'km',f:1},walk:{l:'Walking',x:20,u:'km',f:1},
+pushup:{l:'Push-ups',x:1,u:'reps',f:1},pullup:{l:'Pull-ups',x:3,u:'reps',f:1},yoga:{l:'Yoga',x:80,u:'sessions',f:1},
+meditate:{l:'Meditation',x:2,u:'minutes',f:1},exercise:{l:'Daily exercise',x:100,u:'sessions',f:1}};
+const SUBJ=['Ayurveda','Sanskrit','Charaka Samhita','Sushruta Samhita','Ashtanga Hridaya','Anatomy','Physiology','Dravyaguna','Rasa Shastra'];
+const QUESTS=[{id:'q1',t:'Memorize 5 shlokas',a:'shloka',n:5,xp:100},{id:'q2',t:'Solve 30 MCQs',a:'mcq',n:30,xp:100},{id:'q3',t:'Study 2 hours',a:'study',n:2,xp:150},{id:'q4',t:'One gym session',a:'gym',n:1,xp:100},{id:'q5',t:'Meditate 15 minutes',a:'meditate',n:15,xp:60}];
+const TT={1:'Beginner',5:'Scholar',10:'Acharya',15:'Knowledge Warrior',20:'Master Student',30:'Ayurveda Legend',40:'Grandmaster',50:'Vidya Master'};
+const title=l=>TT[Math.max(...Object.keys(TT).filter(k=>k<=l))];
+const need=n=>n<=1?0:Math.round(120*Math.pow(n-1,1.6));
+const lv=x=>{let l=1;while(l<50&&x>=need(l+1))l++;return l};
+const ACH=[
+['a1','📜','First Shloka','Memorize 1 shloka',s=>s.cnt.shloka>=1],['a2','📖','100 Shlokas','Memorize 100 shlokas',s=>s.cnt.shloka>=100],
+['a3','🕉️','Sanskrit Master','500 shlokas',s=>s.cnt.shloka>=500],['a4','🫀','Anatomy Expert','20 hours of Anatomy',s=>(s.subj.Anatomy||0)>=20],
+['a5','🎯','1000 MCQs','Solve 1000 MCQs',s=>s.cnt.mcq>=1000],['a6','🏋️','First Gym Session','Log a gym workout',s=>s.cnt.gym>=1],
+['a7','🔥','30-Day Fitness Streak','30 days of fitness',s=>s.st.fit.n>=30],['a8','🛡️','100-Day Discipline','100-day streak',s=>s.st.all.n>=100],
+['a9','🏹','Knowledge Hunter','Complete 20 chapters',s=>s.cnt.chapter>=20],['a10','👑','Ultimate Scholar','Reach Level 25',s=>lv(s.xp)>=25]];
+const DEF=()=>({xp:0,coins:0,dia:0,ap:0,en:50,cnt:{},subj:{},log:[],ach:{},st:{all:{n:0,last:''},fit:{n:0,last:''}},day:{d:'',c:{},cl:{}},rates:{},show:{lvl:1,xp:1,coins:1,study:1,fit:1,streak:1},name:'Seeker',av:'🧙'});
+let S=DEF(),tab='home';
+const DBP=new Promise(r=>{try{const q=indexedDB.open('vq',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(e){r(null)}});
+async function load(){const d=await DBP;if(!d)return;return new Promise(r=>{const q=d.transaction('kv').objectStore('kv').get('s');q.onsuccess=()=>{if(q.result)S=Object.assign(DEF(),q.result);r()};q.onerror=r})}
+async function save(){const d=await DBP;if(d)try{d.transaction('kv','readwrite').objectStore('kv').put(S,'s')}catch(e){}}
+const today=()=>new Date().toLocaleDateString('en-CA');
+function rolld(){if(S.day.d!==today())S.day={d:today(),c:{},cl:{}}}
+function bump(k){const s=S.st[k],t=today();if(s.last===t)return;const y=new Date(Date.now()-864e5).toLocaleDateString('en-CA');s.n=s.last===y?s.n+1:1;s.last=t}
+function streak(k){const s=S.st[k],t=today(),y=new Date(Date.now()-864e5).toLocaleDateString('en-CA');return(s.last===t||s.last===y)?s.n:0}
+const rate=a=>S.rates[a]!=null?S.rates[a]:ACT[a].x;
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
+function flo(t){const e=document.createElement('div');e.id='fl';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1500);pops.push({t,at:Date.now()})}
+function modal(h){const m=$('#md');m.innerHTML='<div class="card">'+h+'</div>';m.style.display='grid'}
+function closeM(){$('#md').style.display='none';if(window.SR&&SR.r){try{SR.r.stop()}catch(e){}}}
+function post(prev){
+ const l=lv(S.xp);
+ ACH.forEach(a=>{if(!S.ach[a[0]]&&a[4](S)){S.ach[a[0]]=Date.now();S.ap+=10;S.dia+=2;toast('🏆 '+a[2]+' unlocked!');banners.push({t:'🏆 '+a[2],at:Date.now()})}});
+ if(l>prev){const d=(l-prev)*5;S.dia+=d;S.coins+=(l-prev)*50;modal('<div class="big">🎉</div><h2>LEVEL UP!</h2><h1>Level '+l+'</h1><h3>'+title(l)+'</h3><p>Reward: +'+d+' 💎 and +'+(l-prev)*50+' 🪙</p><button class="btn" onclick="closeM()">Awesome!</button>')}
+ save();render()}
+function apply(a,q,sub){
+ rolld();const prev=lv(S.xp),xp=Math.round(q*rate(a)),co=Math.round(xp/4);
+ S.xp+=xp;S.coins+=co;S.en=Math.min(100,S.en+5);S.cnt[a]=(S.cnt[a]||0)+q;S.day.c[a]=(S.day.c[a]||0)+q;
+ if(sub)S.subj[sub]=(S.subj[sub]||0)+(a==='study'?q:1);
+ S.log.unshift({t:Date.now(),a,q,sub,xp});S.log=S.log.slice(0,300);
+ bump('all');if(ACT[a].f)bump('fit');
+ flo('+'+xp+' XP');post(prev)}
+function propose(a,q,sub){
+ if(!(q>0))return toast('Enter a quantity greater than 0');
+ const xp=Math.round(q*rate(a));
+ modal('<h2>Activity detected</h2><h3>'+q+' '+ACT[a].l+(sub&&ACT[a].s?' ('+sub+')':'')+'</h3><p>Reward: <b>+'+xp+' XP</b> and +'+Math.round(xp/4)+' 🪙</p><small>Rewards are added only after you confirm. This is self-reported logging.</small><br><button class="btn" id="cf">✅ Confirm</button><button class="btn r" onclick="closeM()">Cancel</button>');
+ $('#cf').onclick=()=>{closeM();apply(a,q,sub)}}
+function submitF(sa,sq,ss){const a=$('#'+sa).value;propose(a,parseFloat($('#'+sq).value),ss&&ACT[a].s?$('#'+ss).value:null)}
+function claim(id){const q=QUESTS.find(x=>x.id===id);rolld();S.day.cl[id]=1;const prev=lv(S.xp);S.xp+=q.xp;S.coins+=q.xp/2;S.dia+=1;modal('<div class="big">🎁</div><h2>Treasure Chest!</h2><p>+'+q.xp+' XP, +'+q.xp/2+' 🪙, +1 💎</p><button class="btn" onclick="closeM()">Collect</button>');flo('+'+q.xp+' XP');post(prev)}
+/* voice */
+const NW={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,fifteen:15,twenty:20,thirty:30,forty:40,fifty:50,hundred:100};
+function parse(t){t=t.toLowerCase();let m=t.match(/\d+(\.\d+)?/),n=m?+m[0]:null;
+ if(n==null)for(const w in NW)if(new RegExp('\\b'+w+'\\b').test(t)){n=NW[w];break}
+ let a=null;const R=[['shloka',/shlok|श्लोक/],['mcq',/mcq|question/],['meditate',/meditat|ध्यान/],['pushup',/push/],['pullup',/pull/],['gym',/gym|workout/],['run',/\brun|jog/],['walk',/walk/],['yoga',/yoga/],['exercise',/exercise/],['revision',/revis/],['chapter',/chapter/],['study',/stud|read|पढ़/]];
+ for(const r of R)if(r[1].test(t)){a=r[0];break}
+ if(!a)return{};
+ let q=n;
+ if(['gym','yoga','exercise','revision'].includes(a)&&q==null)q=1;
+ if(a==='meditate'&&/hour/.test(t))q*=60;
+ if(a==='study'&&/minute/.test(t))q/=60;
+ let sub='Ayurveda';[['Charaka',/charaka/],['Sushruta',/sushruta/],['Ashtanga Hridaya',/ashtanga/],['Anatomy',/anatomy/],['Physiology',/physiology/],['Dravyaguna',/dravya/],['Rasa Shastra',/rasa/],['Sanskrit',/sanskrit/]].forEach(x=>{if(x[1].test(t))sub=x[0]==='Charaka'?'Charaka Samhita':x[0]==='Sushruta'?'Sushruta Samhita':x[0]});
+ return{a,q,sub}}
+const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;window.SR={r:null};
+function voice(){modal('<h2>🎤 Voice Command</h2><small>Say e.g. “I memorized 10 Sanskrit shlokas”, “I completed 50 MCQs”, “I studied Ayurveda for 2 hours”, “I did 30 minutes of meditation”.</small><select id="vl"><option value="en-IN">English (India)</option><option value="hi-IN">हिन्दी</option></select><textarea id="vt" rows="3" placeholder="Recognized text appears here. You can also type your command."></textarea><div id="vm"></div><button class="btn p" onclick="listen()">🎤 Listen</button><button class="btn" onclick="understand()">Understand</button><button class="btn r" onclick="closeM()">Close</button><br><small>Voice only logs what you say; it cannot verify that you really did the activity.</small>');
+ if(!SRC)$('#vm').innerHTML='<p>⚠️ Voice recognition is not supported in this browser. Type your command above, or use the Vidya / Warrior tabs. (Chrome on Android works best.)</p>'}
+function listen(){if(!SRC)return;try{const r=new SRC();SR.r=r;r.lang=$('#vl').value;r.interimResults=true;r.onresult=e=>{$('#vt').value=[...e.results].map(x=>x[0].transcript).join(' ')};r.onerror=e=>{$('#vm').textContent='Mic error: '+e.error+'. Check microphone permission or type your command.'};r.onend=()=>{if($('#vt')&&$('#vt').value){$('#vm').textContent='Heard. Tap Understand.'}};r.start();$('#vm').textContent='Listening…'}catch(e){$('#vm').textContent='Could not start voice recognition.'}}
+function understand(){const p=parse($('#vt').value);if(!p.a)return $('#vm').textContent='Could not detect an activity. Try again or use the Vidya/Warrior tabs.';if(!(p.q>0))return $('#vm').textContent='Activity found ('+ACT[p.a].l+') but no quantity. Please say a number.';propose(p.a,p.q,p.sub)}
+/* camera */
+let cs=null,recS=null,recV=null,urlS=null,urlV=null,pops=[],banners=[],bg='cam';
+const vid=document.createElement('video');vid.muted=true;vid.playsInline=true;
+const cv=document.createElement('canvas');cv.width=720;cv.height=1280;
+async function cam(){try{cs=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:720},height:{ideal:1280}},audio:true});vid.srcObject=cs;vid.play();render()}catch(e){toast('Camera/mic not available: '+(e.name||e))}}
+function stopCam(){if(cs)cs.getTracks().forEach(t=>t.stop());cs=null;render()}
+const mime=()=>['video/webm;codecs=vp9,opus','video/webm','video/mp4'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));
+function startRec(kind){if(!cs)return toast('Start the camera first');if(!window.MediaRecorder)return toast('Recording not supported here');
+ const st=kind==='v'?new MediaStream([...cv.captureStream(30).getVideoTracks(),...cs.getAudioTracks()]):cs;
+ const ch=[],r=new MediaRecorder(st,mime()?{mimeType:mime()}:undefined);r.ondataavailable=e=>e.data.size&&ch.push(e.data);
+ r.onstop=()=>{const u=URL.createObjectURL(new Blob(ch,{type:r.mimeType||'video/webm'}));if(kind==='v'){urlV=u;recV=null}else{urlS=u;recS=null}render()};
+ r.start();if(kind==='v')recV=r;else recS=r;render()}
+function stopRec(k){const r=k==='v'?recV:recS;if(r&&r.state!=='inactive')r.stop()}
+const dl=(u,n)=>u?'<a class="btn" download="'+n+'.webm" href="'+u+'">⬇️ Download</a>':'';
+/* video overlay canvas */
+function rr(x,c,X,Y,w,h,r){x.beginPath();x.roundRect?x.roundRect(X,Y,w,h,r):x.rect(X,Y,w,h)}
+function frame(){requestAnimationFrame(frame);if(tab!=='video'&&!recV)return;const x=cv.getContext('2d'),W=720,H=1280;
+ if(bg==='cam'&&cs&&vid.videoWidth){const s=Math.max(W/vid.videoWidth,H/vid.videoHeight),w=vid.videoWidth*s,h=vid.videoHeight*s;x.drawImage(vid,(W-w)/2,(H-h)/2,w,h)}
+ else{x.fillStyle=bg==='green'?'#00b140':'#1c0a40';x.fillRect(0,0,W,H)}
+ const l=lv(S.xp),c=need(l),n=need(l+1),p=l>=50?1:(S.xp-c)/(n-c),sh=S.show;rolld();
+ let y=50;const lines=[];
+ if(sh.lvl)lines.push(['t','Lv '+l+' · '+title(l)]);
+ if(sh.xp)lines.push(['b',p,S.xp+' XP']);
+ if(sh.coins)lines.push(['t','🪙 '+S.coins+'   💎 '+S.dia]);
+ const fr=a=>QUESTS.filter(q=>a.includes(q.a)).reduce((s,q)=>s+Math.min(1,(S.day.c[q.a]||0)/q.n),0)/a.length;
+ if(sh.study)lines.push(['b',fr(['shloka','mcq','study']),'📚 Study today']);
+ if(sh.fit)lines.push(['b',fr(['gym','meditate']),'💪 Fitness today']);
+ if(sh.streak)lines.push(['t','🔥 Streak: '+streak('all')+' days']);
+ if(lines.length){const hh=lines.reduce((s,q)=>s+(q[0]==='t'?46:44),30);x.fillStyle='#2a0f5cbb';rr(x,0,24,y-10,672,hh,26);x.fill();x.strokeStyle='#ffd24a';x.lineWidth=4;x.stroke();y+=14;
+  lines.forEach(q=>{if(q[0]==='t'){x.fillStyle='#ffd24a';x.font='bold 32px system-ui';x.fillText(q[1],48,y+26);y+=46}else{x.fillStyle='#0009';rr(x,0,48,y,624,32,16);x.fill();x.fillStyle='#ffd24a';rr(x,0,48,y,Math.max(8,624*q[1]),32,16);x.fill();x.fillStyle='#fff';x.font='bold 20px system-ui';x.fillText(q[2],64,y+23);y+=44}})}
+ const now=Date.now();pops=pops.filter(q=>now-q.at<1800);pops.forEach(q=>{const k=(now-q.at)/1800;x.globalAlpha=1-k;x.fillStyle='#ffd24a';x.strokeStyle='#000';x.lineWidth=6;x.font='bold 64px system-ui';x.textAlign='center';x.strokeText(q.t,W/2,H*0.55-k*160);x.fillText(q.t,W/2,H*0.55-k*160);x.textAlign='left';x.globalAlpha=1});
+ banners=banners.filter(q=>now-q.at<3500);if(banners[0]){x.fillStyle='#4b1d9aee';rr(x,0,60,H-250,600,80,30);x.fill();x.strokeStyle='#ffd24a';x.stroke();x.fillStyle='#fff';x.font='bold 32px system-ui';x.textAlign='center';x.fillText(banners[0].t,W/2,H-198);x.textAlign='left'}
+ x.fillStyle='#fff9';x.font='bold 22px system-ui';x.fillText('VIDYA QUEST',48,H-40)}
+/* views */
+const TABS=[['home','🏰','Home'],['vidya','📚','Vidya'],['warrior','⚔️','Warrior'],['studio','🎥','Studio'],['video','📱','Video'],['trophy','🏆','Trophies'],['set','⚙️','Settings']];
+const opts=(f)=>Object.keys(ACT).filter(k=>f(ACT[k])).map(k=>'<option value="'+k+'">'+ACT[k].l+' ('+ACT[k].u+')</option>').join('');
+const hist=f=>'<div class="card"><b>Recent</b>'+(S.log.filter(e=>f(ACT[e.a])).slice(0,6).map(e=>'<div class="q"><span>'+e.q+' '+ACT[e.a].l+(e.sub?' · '+e.sub:'')+'</span><b>+'+e.xp+'</b></div>').join('')||'<br><small>Nothing yet. Start your quest!</small>')+'</div>';
+const V={
+home(){const l=lv(S.xp),c=need(l),n=need(l+1),p=l>=50?100:(S.xp-c)/(n-c)*100;rolld();
+ return'<div class="card hero"><div class="av">'+S.av+'</div><div style="flex:1"><b style="font-size:20px">'+S.name+'</b><br>Level '+l+' · '+title(l)+'<div class="bar"><i style="width:'+p+'%"></i><span>'+(l>=50?'MAX':S.xp-c+' / '+(n-c)+' XP')+'</span></div></div></div>'+
+ '<div class="card"><div class="stats"><b>🪙 '+S.coins+'</b><b>💎 '+S.dia+'</b><b>⚡ '+S.en+'</b><b>🏅 '+S.ap+'</b><b>🔥 '+streak('all')+'d</b></div><small>Overall progress (Level '+l+' / 50)</small><div class="bar"><i style="width:'+l*2+'%"></i><span>'+l*2+'%</span></div></div>'+
+ '<div class="card"><h2>🗡️ Daily Quests</h2>'+QUESTS.map(q=>{const d=S.day.c[q.a]||0,ok=d>=q.n,cl=S.day.cl[q.id];return'<div class="q"><span>'+(ok?'✅':'⬜')+' '+q.t+'<br><small>'+Math.min(d,q.n)+' / '+q.n+' · +'+q.xp+' XP</small></span>'+(cl?'<span>🎁✔</span>':ok?'<button class="btn" onclick="claim(\''+q.id+'\')">🎁 Claim</button>':'')+'</div>'}).join('')+'</div>'},
+vidya(){return'<div class="card"><h2>📚 Vidya – Study</h2><select id="sa" onchange="$(\'#ssw\').style.display=ACT[this.value].s?\'block\':\'none\'">'+opts(a=>!a.f)+'</select><div id="ssw"><select id="ss">'+SUBJ.map(s=>'<option>'+s+'</option>').join('')+'</select></div><input id="sq" type="number" step="any" min="0" placeholder="How many?"><button class="btn" onclick="submitF(\'sa\',\'sq\',\'ss\')">⚔️ Log Quest</button><br><small>Shlokas, MCQs, hours, chapters or revision sessions.</small></div>'+hist(a=>!a.f)},
+warrior(){return'<div class="card"><h2>⚔️ Warrior – Fitness</h2><select id="fa">'+opts(a=>a.f)+'</select><input id="fq" type="number" step="any" min="0" placeholder="How many? (sessions / km / reps / minutes)"><button class="btn" onclick="submitF(\'fa\',\'fq\')">💪 Log Workout</button></div>'+hist(a=>a.f)},
+studio(){return'<div class="card"><h2>🎥 Camera Studio</h2>'+(cs?'<video id="pv" autoplay muted playsinline></video>':'<p>Allow camera and microphone to preview yourself and record study or workout videos. Recordings are personal evidence only; they do not verify anything.</p>')+
+ (cs?'<button class="btn r" onclick="stopCam()">Stop camera</button>':'<button class="btn p" onclick="cam()">📷 Start Camera</button>')+
+ (cs?(recS?'<button class="btn r" onclick="stopRec(\'s\')">⏹ Stop Recording</button>':'<button class="btn" onclick="startRec(\'s\')">⏺ Start Recording</button>'):'')+
+ (urlS?'<h3>▶️ Playback</h3><video src="'+urlS+'" controls playsinline></video>'+dl(urlS,'vidya-quest-recording'):'')+'<br><small>Recordings are not stored in the app. Download them to keep them.</small></div>'},
+video(){return'<div class="card"><h2>📱 Video Mode (9:16)</h2><div id="cvh"></div><div class="row">'+(cs?'<button class="btn r" onclick="stopCam()">Stop cam</button>':'<button class="btn p" onclick="cam()">📷 Camera</button>')+(recV?'<button class="btn r" onclick="stopRec(\'v\')">⏹ Stop</button>':'<button class="btn" onclick="startRec(\'v\')">⏺ Record</button>')+'</div><select onchange="bg=this.value"><option value="cam">Background: my camera</option><option value="green">Green screen</option><option value="purple">Purple game bg</option></select><b>Show in video:</b><br>'+
+ [['lvl','Level'],['xp','XP bar'],['coins','Coins & diamonds'],['study','Study progress'],['fit','Fitness progress'],['streak','Streak']].map(k=>'<label><input type="checkbox" '+(S.show[k[0]]?'checked':'')+' onchange="S.show[\''+k[0]+'\']=this.checked?1:0;save()"> '+k[1]+'</label>').join('<br>')+
+ (urlV?'<h3>▶️ Playback</h3><video src="'+urlV+'" controls playsinline></video>'+dl(urlV,'vidya-quest-video'):'')+'<br><small>The overlay is recorded into the video. Log activities (🎤) while recording to see animated +XP.</small></div>'},
+trophy(){return'<div class="card"><h2>🏆 Achievements</h2>'+ACH.map(a=>'<div class="ach '+(S.ach[a[0]]?'on':'')+'"><big>'+a[1]+'</big><b>'+a[2]+'</b><br>'+a[3]+'</div>').join('')+'</div><div class="card"><b>Next titles</b>'+Object.keys(TT).map(k=>'<div class="q"><span>Level '+k+'</span><b>'+TT[k]+'</b></div>').join('')+'</div>'},
+set(){return'<div class="card"><h2>⚙️ Settings</h2><input value="'+S.name+'" onchange="S.name=this.value||\'Seeker\';save()"><select onchange="S.av=this.value;save()">'+['🧙','🧘','🦸','🥷','🧝','🦁','🐯','🕉️'].map(e=>'<option '+(e===S.av?'selected':'')+'>'+e+'</option>').join('')+'</select></div><div class="card"><b>Reward values (XP per unit)</b>'+Object.keys(ACT).map(k=>'<div class="q"><span>'+ACT[k].l+' / '+ACT[k].u.replace(/s$/,'')+'</span><input style="width:90px" type="number" step="any" value="'+rate(k)+'" onchange="S.rates[\''+k+'\']=+this.value;save()"></div>').join('')+'</div><div class="card"><b>Backup</b><br><button class="btn" onclick="exp()">⬇️ Export</button><label class="btn p">⬆️ Import<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label><button class="btn r" onclick="if(confirm(\'Delete ALL progress?\')){S=DEF();save();render()}">Reset</button></div>'}};
+function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='vidya-quest-backup-'+today()+'.json';a.click()}
+function imp(f){if(!f)return;f.text().then(t=>{try{S=Object.assign(DEF(),JSON.parse(t));save();render();toast('Backup restored')}catch(e){toast('Invalid backup file')}})}
+function render(){rolld();$('#nav').innerHTML=TABS.map(t=>'<button class="'+(t[0]===tab?'on':'')+'" onclick="tab=\''+t[0]+'\';render()"><b>'+t[1]+'</b>'+t[2]+'</button>').join('');
+ const keep=document.activeElement&&document.activeElement.tagName==='INPUT'&&tab!=='set';
+ $('#app').innerHTML=V[tab]();
+ if(tab==='video')$('#cvh').appendChild(cv);
+ const pv=$('#pv');if(pv&&cs)pv.srcObject=cs;
+ const ssw=$('#ssw');if(ssw)ssw.style.display='block'}
+load().then(()=>{render();frame()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
